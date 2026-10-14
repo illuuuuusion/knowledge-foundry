@@ -1,0 +1,151 @@
+{
+  "schema_version": 1,
+  "project": "knowledge-foundry",
+  "current_phase": "P1",
+  "user_testing_allowed": false,
+  "rules": {
+    "agent_written_tests_required": true,
+    "independent_ai_review_preferred": true,
+    "review_after_each_phase": true,
+    "commits_english_only": true,
+    "co_author_trailers_forbidden": true,
+    "mcp_required": false
+  },
+  "phases": {
+    "P0": {
+      "title": "Repository foundation and governance",
+      "status": "completed",
+      "tests": {
+        "status": "passed",
+        "report": "docs/test-reports/P0.md"
+      },
+      "review": {
+        "status": "approved",
+        "report": "docs/reviews/P0.md"
+      },
+      "knowledge_updated": true,
+      "planned_commit_message": "chore: initialize project structure and workflow",
+      "blockers": []
+    },
+    "P1": {
+      "title": "Video source discovery",
+      "status": "pending",
+      "tests": {
+        "status": "pending",
+        "report": null
+      },
+      "review": {
+        "status": "pending",
+        "report": null
+      },
+      "knowledge_updated": false,
+      "planned_commit_message": "feat(ingest): discover videos from supported URLs",
+      "blockers": []
+    },
+    "P2": {
+      "title": "Transcript ingestion and storage",
+      "status": "pending",
+      "tests": {
+        "status": "pending",
+        "report": null
+      },
+      "review": {
+        "status": "pending",
+        "report": null
+      },
+      "knowledge_updated": false,
+      "planned_commit_message": "feat(ingest): normalize and persist transcripts",
+      "blockers": []
+    },
+    "P3": {
+      "title": "Exporters and Streamlit UI",
+      "status": "pending",
+      "tests": {
+        "status": "pending",
+        "report": null
+      },
+      "review": {
+        "status": "pending",
+        "report": null
+      },
+      "knowledge_updated": false,
+      "planned_commit_message": "feat(export): add configurable transcript exports",
+      "blockers": []
+    },
+    "P4": {
+      "title": "Agent job orchestration",
+      "status": "pending",
+      "tests": {
+        "status": "pending",
+        "report": null
+      },
+      "review": {
+        "status": "pending",
+        "report": null
+      },
+      "knowledge_updated": false,
+      "planned_commit_message": "feat(builder): introduce file-based extraction jobs",
+      "blockers": []
+    },
+    "P5": {
+      "title": "Research enrichment and graph",
+      "status": "pending",
+      "tests": {
+        "status": "pending",
+        "report": null
+      },
+      "review": {
+        "status": "pending",
+        "report": null
+      },
+      "knowledge_updated": false,
+      "planned_commit_message": "feat(builder): consolidate evidence and graph relations",
+      "blockers": []
+    },
+    "P6": {
+      "title": "Portable knowledge package generation",
+      "status": "pending",
+      "tests": {
+        "status": "pending",
+        "report": null
+      },
+      "review": {
+        "status": "pending",
+        "report": null
+      },
+      "knowledge_updated": false,
+      "planned_commit_message": "feat(knowledge): generate agent-ready knowledge packs",
+      "blockers": []
+    },
+    "P7": {
+      "title": "AI end-to-end verification",
+      "status": "pending",
+      "tests": {
+        "status": "pending",
+        "report": null
+      },
+      "review": {
+        "status": "pending",
+        "report": null
+      },
+      "knowledge_updated": false,
+      "planned_commit_message": "test: complete automated end-to-end verification",
+      "blockers": []
+    },
+    "P8": {
+      "title": "Final user acceptance testing",
+      "status": "pending",
+      "tests": {
+        "status": "pending",
+        "report": null
+      },
+      "review": {
+        "status": "pending",
+        "report": null
+      },
+      "knowledge_updated": false,
+      "planned_commit_message": "docs: record final user acceptance results",
+      "blockers": []
+    }
+  }
+}

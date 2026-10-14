@@ -1,0 +1,8 @@
+[paths]
+data_dir = "data"
+source_dir = "sources"
+output_dir = "output"
+database = "data/state.sqlite3"
+
+[logging]
+level = "INFO"
