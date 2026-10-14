@@ -109,3 +109,27 @@
   source files and confirming read-only/lossless export with extra offline fixtures.
   The optional Markdown parser was absent; structural protection was checked and
   no parser/browser proof was claimed. Complete P3 and hand off to P4 only.
+
+## 2026-10-15 — P4 extraction jobs
+
+- The user explicitly requested P4 fully. Implement jobs, schema, import and
+  cross-reference checks only; evidence consolidation/graph remain P5.
+- The plan names YAML and Pydantic. Make pydantic/PyYAML core dependencies rather
+  than an optional extra: jobs are a core product feature, and optional imports
+  would add guards and skipped tests. This supersedes the P0 "no runtime
+  dependency" note; the base install still needs no service or model API.
+- Partition per video, never across videos, so new videos do not rename jobs.
+  Content-addressed job IDs make settings changes produce new jobs.
+- Validate results against canonical SQLite input recomputed at import, not the
+  job folder files an agent could edit. Accept/reject whole results; keep the
+  earlier accepted row on a rejected replacement. No job-state table is needed:
+  pending is derived from files, accepted results live in SQLite.
+- Force `unverified` in the schema; transcript claims are never verified in P4.
+- A separate reviewer subagent ran a code-blind job-agent smoke (told about the
+  injection and given the import command in advance; valid import on the
+  first attempt, injected instruction ignored) and approved with eight
+  non-blocking findings. Fixed: import location hint in TASK.md and an explicit
+  error when no job folder exists, truncated error locations, accurate job-ID
+  docstring plus version-bump note, `run kforge init` hint for old stores.
+  Documented: gap-edge citations, stale rows after re-ingest/settings change,
+  pending after deleting an imported result, stale folders exit 0.

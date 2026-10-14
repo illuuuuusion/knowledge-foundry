@@ -6,6 +6,7 @@ Read this index first; load only notes relevant to the active phase.
 - [Decisions](DECISIONS.md): reasons for foundation choices.
 - [Handoff](HANDOFF.md): phase results, limits and next steps.
 - [Exports/UI](EXPORTS_UI.md): P3 offline grouping, shared CLI workflows and Streamlit.
+- [Jobs](JOBS.md): P4 domain YAML, job files, result validation and import.
 - [Transcripts](TRANSCRIPTS.md): P2 caption selection, canonical storage and recovery.
 - [Discovery](DISCOVERY.md): P1 source/manifest contract, pagination and limits.
 

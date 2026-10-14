@@ -18,6 +18,7 @@ from .ingest.urls import parse_url_list
 from .storage import migrate
 from . import workflows
 from .export.transcripts import group_size
+from .builder import jobs
 
 
 def _group_size(value: str) -> int | str:
@@ -60,6 +61,14 @@ def main(argv: list[str] | None = None) -> int:
     _export_options(export)
     export.add_argument('--video-id', dest='video_ids', action='append',
                         help='Stable youtube:video:<id>; repeat to select videos (default: all stored)')
+    job = commands.add_parser('jobs', help='File-based agent extraction jobs')
+    job_commands = job.add_subparsers(dest='job_command', required=True)
+    create = job_commands.add_parser('create', help='Write TASK.md/input.jsonl/schema.json job folders offline')
+    importer = job_commands.add_parser('import', help='Validate and import agent result.json files')
+    for sub in (create, importer):
+        sub.add_argument('domain', type=Path, help='Domain YAML configuration')
+    create.add_argument('--video-id', dest='video_ids', action='append',
+                        help='Stable youtube:video:<id>; repeat to select videos (default: all stored)')
     ui = commands.add_parser('ui', help='Run the local Streamlit interface (requires ui extra)')
     ui.add_argument('--port', type=int, default=8501)
     args = parser.parse_args(argv)
@@ -80,6 +89,14 @@ def main(argv: list[str] | None = None) -> int:
             report = workflows.export(config, formats=args.formats or ('markdown',),
                                       grouping=args.group_size, video_ids=args.video_ids)
             print(json.dumps(report.to_dict(), ensure_ascii=False, indent=2, allow_nan=False))
+        elif args.command == 'jobs':
+            domain = jobs.load_domain(args.domain)
+            if args.job_command == 'create':
+                statuses = jobs.create_jobs(config.database, config.output_dir, domain, args.video_ids)
+            else:
+                statuses = jobs.import_results(config.database, config.output_dir, domain)
+            print(json.dumps([asdict(status) for status in statuses], ensure_ascii=False, indent=2))
+            return int(any(status.status == 'rejected' for status in statuses))
         elif args.command == 'ui':
             if not 1 <= args.port <= 65535:
                 raise ValueError('port must be between 1 and 65535')

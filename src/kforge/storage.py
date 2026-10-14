@@ -18,6 +18,11 @@ MIGRATIONS = (
         "attempts INTEGER NOT NULL DEFAULT 0, issue TEXT, "
         "updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)",
     )),
+    (3, (
+        "CREATE TABLE extraction_results (job_id TEXT PRIMARY KEY, domain TEXT NOT NULL, "
+        "source_id TEXT NOT NULL, result_sha256 TEXT NOT NULL, payload TEXT NOT NULL, "
+        "updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)",
+    )),
 )
 
 

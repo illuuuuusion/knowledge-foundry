@@ -99,7 +99,7 @@ def read_snapshot(database: Path, video_ids: Iterable[str] | None = None) -> tup
     with closing(sqlite3.connect(uri, uri=True, timeout=10)) as connection:
         connection.execute('BEGIN')
         if connection.execute('PRAGMA user_version').fetchone()[0] != MIGRATIONS[-1][0]:
-            raise ValueError('Database schema must be initialized at the current version')
+            raise ValueError('Database schema must be initialized at the current version; run kforge init')
         rows = connection.execute('SELECT video_id,payload FROM transcripts ORDER BY video_id').fetchall()
         found = {row[0] for row in rows}
         if requested is not None and set(requested) - found:

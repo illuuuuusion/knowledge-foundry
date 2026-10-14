@@ -96,12 +96,12 @@ class StorageTests(unittest.TestCase):
         self.database = Path(self.temp.name) / "nested/state.sqlite3"
 
     def test_fresh_and_repeated_migrations_preserve_one_row_per_version(self):
-        self.assertEqual(migrate(self.database), 2)
-        self.assertEqual(migrate(self.database), 2)
+        self.assertEqual(migrate(self.database), 3)
+        self.assertEqual(migrate(self.database), 3)
         with closing(sqlite3.connect(self.database)) as connection:
-            self.assertEqual(connection.execute("PRAGMA user_version").fetchone(), (2,))
+            self.assertEqual(connection.execute("PRAGMA user_version").fetchone(), (3,))
             self.assertEqual(connection.execute(
-                "SELECT version FROM schema_migrations ORDER BY version").fetchall(), [(1,), (2,)])
+                "SELECT version FROM schema_migrations ORDER BY version").fetchall(), [(1,), (2,), (3,)])
 
     def test_newer_database_is_rejected_without_downgrade(self):
         migrate(self.database)
@@ -115,17 +115,17 @@ class StorageTests(unittest.TestCase):
     def test_failed_migration_rolls_back_schema_and_version(self):
         migrate(self.database)
         from kforge.storage import MIGRATIONS
-        with patch("kforge.storage.MIGRATIONS", MIGRATIONS + ((3, (
+        with patch("kforge.storage.MIGRATIONS", MIGRATIONS + ((4, (
             "CREATE TABLE partial (id INTEGER)", "INVALID SQL"
         )),)):
             with self.assertRaises(sqlite3.Error):
                 migrate(self.database)
         with closing(sqlite3.connect(self.database)) as connection:
-            self.assertEqual(connection.execute("PRAGMA user_version").fetchone(), (2,))
+            self.assertEqual(connection.execute("PRAGMA user_version").fetchone(), (3,))
             self.assertEqual(connection.execute(
                 "SELECT name FROM sqlite_master WHERE name = 'partial'").fetchall(), [])
             self.assertEqual(connection.execute(
-                "SELECT version FROM schema_migrations ORDER BY version").fetchall(), [(1,), (2,)])
+                "SELECT version FROM schema_migrations ORDER BY version").fetchall(), [(1,), (2,), (3,)])
 
 
 class CliTests(unittest.TestCase):
@@ -175,7 +175,7 @@ class CliTests(unittest.TestCase):
             self.assertEqual(main(["init"]), 0)
         for name in ("data", "source", "output"):
             self.assertTrue((self.root / name).is_dir())
-        self.assertIn("schema 2", stream.getvalue())
+        self.assertIn("schema 3", stream.getvalue())
 
     def test_invalid_config_returns_error_without_traceback(self):
         with redirect_stderr(io.StringIO()) as stream:

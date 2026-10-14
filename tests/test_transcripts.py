@@ -348,10 +348,10 @@ class StoreTests(unittest.TestCase):
         path = self.root / 'old.sqlite3'
         with patch('kforge.storage.MIGRATIONS', MIGRATIONS[:1]):
             self.assertEqual(migrate(path), 1)
-        self.assertEqual(migrate(path), 2)
+        self.assertEqual(migrate(path), 3)
         with closing(sqlite3.connect(path)) as db:
             self.assertEqual(db.execute('SELECT version FROM schema_migrations ORDER BY version').fetchall(),
-                             [(1,), (2,)])
+                             [(1,), (2,), (3,)])
             self.assertEqual(db.execute('SELECT count(*) FROM transcripts').fetchone(), (0,))
 
     def test_failed_domain_migration_rolls_back_and_can_retry(self):
@@ -364,7 +364,7 @@ class StoreTests(unittest.TestCase):
         with closing(sqlite3.connect(path)) as db:
             self.assertEqual(db.execute('PRAGMA user_version').fetchone(), (1,))
             self.assertEqual(db.execute("SELECT name FROM sqlite_master WHERE name='transcripts'").fetchall(), [])
-        self.assertEqual(migrate(path), 2)
+        self.assertEqual(migrate(path), 3)
 
     def test_no_header_secrets_persisted(self):
         track = replace(TRACK, headers={'Authorization': 'synthetic-never-store-secret'})

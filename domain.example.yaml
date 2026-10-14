@@ -1,0 +1,13 @@
+# Example domain for `kforge jobs create|import`. Trusted, user-authored configuration:
+# its title and guidance are copied into every TASK.md. Source text never is.
+id: gpu-repair
+title: GPU repair
+guidance: |
+  Extract repair knowledge about graphics cards: observed symptoms, suspected
+  causes, components, tools, measurements and procedure steps. Keep model and
+  board revision names exactly as stated. Record measurement values only when
+  the speaker states them, including the unit; never estimate missing values.
+entity_types: [gpu_model, board, component, symptom, tool, measurement, procedure]
+claim_kinds: [observation, diagnosis, procedure_step, measurement, warning, recommendation]
+# Approximate characters of transcript text per job (per video; never mixed).
+max_input_chars: 24000

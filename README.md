@@ -3,8 +3,9 @@
 Local-first Python foundation for source-grounded video knowledge workflows.
 P0 provides configuration, logging and SQLite migrations. P1 adds metadata
 discovery. P2 adds caption ingestion and canonical storage; P3 adds grouped exports
-and a local Streamlit interface.
+and a local Streamlit interface. P4 adds file-based agent extraction jobs.
 The offline test suite and base installation need no external service or model API.
+Runtime dependencies are Pydantic and PyYAML (P4 schema and domain configuration).
 
 Requires Python 3.11 or newer. From the repository root:
 
@@ -19,7 +20,7 @@ python3 -m venv .venv
 ```
 
 Once the environment is activated (`source .venv/bin/activate`), use `python`
-and `kforge` directly. Tests use the Python standard library and temporary,
+and `kforge` directly. Tests use the Python standard library unittest and temporary,
 synthetic fixtures; there is no end-user testing before P8.
 
 Configuration precedence is environment variables, then an explicit TOML file,
@@ -199,3 +200,41 @@ when the ui extra is installed; tests skip that optional native UI group without
 Streamlit. CI installs ui/discovery extras to exercise the entire suite. See
 [P3 export/UI contract](docs/project-knowledge/EXPORTS_UI.md),
 [P3 test report](docs/test-reports/P3.md) and [P3 review](docs/reviews/P3.md).
+
+## Agent extraction jobs (P4)
+
+A domain YAML file (see `domain.example.yaml`) defines the domain ID, title,
+guidance, allowed entity types and claim kinds, and an approximate character
+budget per job. It is trusted local configuration. After `scrape` (or `init` on
+an existing store, which applies migration v3):
+
+```sh
+kforge jobs create domain.example.yaml            # optionally --video-id youtube:video:ID
+# Let Claude Code/Codex open one job folder, read TASK.md, and write result.json.
+kforge jobs import domain.example.yaml
+```
+
+`create` is offline and writes `output/jobs/<domain>/<job_id>/` with `TASK.md`,
+`input.jsonl` (untrusted transcript segments with source ID, URL, source index
+and start/end seconds) and `schema.json` (generated from the Pydantic result
+model). Each video is partitioned separately in segment order; a job ID is
+`<video id>-<part>-<hash>`, where the hash covers the input, domain settings and
+result schema version. Reruns rewrite identical files and never touch an existing
+`result.json`; changed domain settings produce new job IDs instead of reusing
+results produced under other instructions. No model API is called.
+
+`import` validates each `result.json` against the schema and against the trusted
+canonical input from SQLite (never the job's own files): every claim needs at
+least one citation whose source ID is in the job and whose start/end lie within
+and overlap the job's segments; kinds, entity types and entity references must
+match the domain; `verification_status` must be `unverified`. A result is
+accepted or rejected as a whole. Accepted results go to SQLite table
+`extraction_results` with domain, job input hash and result hash. Unchanged
+results are skipped, a rejected replacement keeps the earlier accepted result,
+and folders from older settings are reported as `stale`. Statuses are `pending`,
+`imported`, `unchanged`, `rejected` (with error locations, exit 1) or `stale`.
+Run `import` with the same working directory/configuration as `create`; without a
+job folder for the domain it fails with exit 1. Deleting an imported result.json
+shows `pending`, but the stored result remains in SQLite.
+Transcript text stays data: TASK.md contains only trusted configuration, IDs
+and numbers, and imported claims remain unverified for P5 evidence work.

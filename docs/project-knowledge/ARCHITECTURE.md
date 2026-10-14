@@ -59,3 +59,11 @@ shared scrape/export workflows and an optional local Streamlit UI. It extends
 CLI and packaging/CI extras while retaining canonical storage and migration v2.
 All earlier regression tests run again. See [Exports/UI](EXPORTS_UI.md) for the
 view/provenance/path contract, offline behavior and optional UI test strategy.
+
+## P4 extension
+
+P4 adds `builder/jobs.py` and the `jobs create|import` CLI. Pydantic and PyYAML
+become the first core runtime dependencies (local open-source libraries; no
+service, MCP or proprietary API). Append-only migration v3 adds
+`extraction_results`; v1/v2 are unchanged, and existing migration tests now expect
+v3. Export and jobs read through the P3 `read_snapshot`. See [Jobs](JOBS.md).

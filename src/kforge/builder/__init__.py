@@ -1,1 +1,1 @@
-"""Reserved for file jobs, evidence consolidation and graph output (P4–P5)."""
+"""File-based extraction jobs (P4); evidence consolidation and graph output (P5)."""
