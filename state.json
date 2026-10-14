@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "knowledge-foundry",
-  "current_phase": "P3",
+  "current_phase": "P4",
   "user_testing_allowed": false,
   "rules": {
     "agent_written_tests_required": true,
@@ -59,16 +59,16 @@
     },
     "P3": {
       "title": "Exporters and Streamlit UI",
-      "status": "pending",
+      "status": "completed",
       "tests": {
-        "status": "pending",
-        "report": null
+        "status": "passed",
+        "report": "docs/test-reports/P3.md"
       },
       "review": {
-        "status": "pending",
-        "report": null
+        "status": "approved",
+        "report": "docs/reviews/P3.md"
       },
-      "knowledge_updated": false,
+      "knowledge_updated": true,
       "planned_commit_message": "feat(export): add configurable transcript exports",
       "blockers": []
     },

@@ -12,6 +12,7 @@ dependencies = []
 
 [project.optional-dependencies]
 discovery = ["yt-dlp>=2024.10.22"]
+ui = ["streamlit>=1.40,<2"]
 
 [project.scripts]
 kforge = "kforge.cli:main"

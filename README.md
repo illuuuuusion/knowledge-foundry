@@ -2,7 +2,8 @@
 
 Local-first Python foundation for source-grounded video knowledge workflows.
 P0 provides configuration, logging and SQLite migrations. P1 adds metadata
-discovery. P2 adds caption ingestion and canonical storage; exports arrive in P3.
+discovery. P2 adds caption ingestion and canonical storage; P3 adds grouped exports
+and a local Streamlit interface.
 The offline test suite and base installation need no external service or model API.
 
 Requires Python 3.11 or newer. From the repository root:
@@ -87,7 +88,7 @@ or prove review quality. Human acceptance is reserved for P8.
 ## Transcript ingestion (P2 Python service)
 
 Use the same optional `discovery` extra for caption access. P2 exposes the shared
-Python service; the `scrape` CLI and UI are reserved for P3. For an authorized source:
+Python service; the P3 `scrape` CLI and UI use that same implementation. For an authorized source:
 
 ```python
 from kforge.config import load_config
@@ -129,3 +130,72 @@ canonical directory per database. All default runtime files are ignored.
 
 No live caption access has been verified; tests use original synthetic fixtures
 and mocked native yt-dlp calls. See [P2 storage contract](docs/project-knowledge/TRANSCRIPTS.md).
+
+## CLI and local interface (P3)
+
+After installation and environment activation:
+
+```sh
+kforge scrape 'YOUR_AUTHORIZED_YOUTUBE_URL' --limit 10 --language de --language en --preference manual --group-size 2 --format markdown --format jsonl
+kforge scrape --url-file /path/to/urls.txt --limit 10 --retry-failed --format txt
+kforge export --group-size all --format markdown --format txt --format jsonl
+kforge export --video-id youtube:video:YOUR_VIDEO_ID --group-size 1 --format jsonl
+```
+
+Replace placeholders with an actual authorized URL/video ID. `scrape` discovers,
+ingests and exports only its selected batch; successful videos already in SQLite
+skip caption retrieval. Discovery still runs on repeated scrape commands. Permanent
+caption failures require `--retry-failed`; transient retries follow P2's policy.
+`--language` may be repeated in priority order (default en); manual/auto preference
+has the other kind as fallback. Limit/order/URL-list behavior matches `discover`.
+JSON status goes to stdout. Partial failures retain successful data and return
+exit 1 with source and video issues; successful operations return 0. Invalid
+argparse options return 2. Exports do not change canonical storage.
+
+`export` reads stored transcripts and manifests offline, even when generated
+canonical JSON files are missing. It never discovers sources, fetches captions,
+migrates a database or repairs canonical files. Run `scrape` or `init` before
+exporting from a new store. Default selection is all stored transcripts; repeat
+`--video-id` to select a subset. Unknown IDs or corrupt/missing provenance fail
+explicitly. Empty initialized storage exports zero files.
+
+`--group-size 1`, a positive integer N, or `all` partitions videos sorted by stable
+ID; timestamps stay relative to each original video. Repeat `--format` to request
+Markdown, TXT and/or JSONL (default Markdown). JSONL contains one envelope per
+video with `record` and `source_manifests`; Markdown/TXT include readable segments
+and a complete JSON provenance section so original metadata, text and timing are
+retained. These are authorized local transcript exports, not shareable knowledge
+packs; redistribution permissions still apply. P6 governs portable knowledge packs.
+
+Generated paths are under the configured output directory, in a deterministic
+`transcripts-g<size>-<content hash>/` batch folder. File names use a group index
+and validated first/last video IDs, never source titles. Identical re-export keeps
+paths and bytes stable; changed selection/grouping/formats/content gets another
+batch folder so earlier outputs remain available. Source text is untrusted, claims
+remain unverified and confidence/visual dependencies are not assessed. Markdown
+keeps source content in code blocks with fences that source text cannot close.
+Individual files are replaced atomically; a failed multi-file export may retain
+already written files and can be rerun safely. SQLite is not modified by export.
+
+Install and start the optional UI:
+
+```sh
+.venv/bin/python -m pip install '.[ui,discovery]'
+.venv/bin/kforge ui
+# Optional: .venv/bin/kforge --config /path/to/config.toml ui --port 8502
+```
+
+The UI listens on 127.0.0.1 (default port 8501), with usage telemetry disabled by
+the launcher. It provides source URLs, video limit, ordered languages, transcript
+preference, export group size/formats, retry control and source/video/export status.
+An additional form exports all stored transcripts offline. Widget changes do not
+collect captions until the form is submitted. Output tables show local files;
+open those files in your chosen editor. CLI and UI use the same workflow functions.
+This local app is not a public multiuser service. Installation/start instructions
+are preparation; real user acceptance remains reserved for P8.
+
+The offline suite includes native Streamlit AppTest with mocked source adapters
+when the ui extra is installed; tests skip that optional native UI group without
+Streamlit. CI installs ui/discovery extras to exercise the entire suite. See
+[P3 export/UI contract](docs/project-knowledge/EXPORTS_UI.md),
+[P3 test report](docs/test-reports/P3.md) and [P3 review](docs/reviews/P3.md).

@@ -82,3 +82,30 @@
   all 104 tests, rechecking both fixes in offline reproductions/subprocesses and
   confirming installed/source parity. All P2 acceptance gates are satisfied;
   advance to P3 for handoff only and retain the P8-only UAT boundary.
+
+## 2026-10-14 — P3 export and local UI
+
+- The user explicitly requested P3 fully. Reuse P1/P2 services through shared
+  workflows, add scrape/export/ui CLI and Streamlit forms; no P4 features.
+- Read SQLite offline and under one read transaction. Never fetch, initialize,
+  migrate or repair canonical JSON during export; missing files do not block it.
+- Export one complete envelope per video with full source manifests. Markdown/TXT
+  include readable segments plus lossless JSON; this preserves all provenance,
+  exact source text and unknown extensions at the cost of some duplicate content.
+- Sort views by stable video ID and group only output files. Content-derived batch
+  directories retain previous exports and eliminate stale layout confusion.
+  Filenames never use source titles; files are atomic writes, batches are not.
+- Render Markdown source URLs/segments as literal dynamically fenced blocks and
+  escape title headings. Never promote claims or execute source content.
+- Keep Streamlit optional, launch only on localhost with telemetry off, and use
+  native AppTest with mock source services/adapters. CI installs optional extras
+  to exercise native contracts. Installation required a permitted network retry;
+  fixture/UI tests themselves use no external sources or real UAT.
+- Initial local full suite passed 142 tests; three additional boundary/provenance
+  regressions brought it to 145. The UI health smoke passed after local socket
+  access was permitted, with no storage effects or source access.
+- A separate AI reviewer approved the actual P3 diff without implementation
+  corrections after independently passing all 145 tests, checking all 19 installed
+  source files and confirming read-only/lossless export with extra offline fixtures.
+  The optional Markdown parser was absent; structural protection was checked and
+  no parser/browser proof was claimed. Complete P3 and hand off to P4 only.

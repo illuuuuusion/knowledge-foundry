@@ -1,1 +1,1 @@
-"""Reserved for export views over canonical records (P3)."""
+"""Offline, lossless transcript export views."""

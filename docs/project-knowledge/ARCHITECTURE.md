@@ -51,3 +51,11 @@ rerun alongside P1 regressions. Captions and resumability use standard-library
 storage and parsing; the existing optional discovery extra supplies yt-dlp access.
 SQLite is authoritative; per-video JSON is an atomic, recoverable file projection.
 See [Transcripts](TRANSCRIPTS.md) for the service, provenance and recovery contract.
+
+## P3 extension
+
+P3 adds read-only SQLite export snapshots, grouped lossless Markdown/TXT/JSONL,
+shared scrape/export workflows and an optional local Streamlit UI. It extends
+CLI and packaging/CI extras while retaining canonical storage and migration v2.
+All earlier regression tests run again. See [Exports/UI](EXPORTS_UI.md) for the
+view/provenance/path contract, offline behavior and optional UI test strategy.
