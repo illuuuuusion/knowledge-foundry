@@ -10,6 +10,9 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []
 
+[project.optional-dependencies]
+discovery = ["yt-dlp>=2024.10.22"]
+
 [project.scripts]
 kforge = "kforge.cli:main"
 

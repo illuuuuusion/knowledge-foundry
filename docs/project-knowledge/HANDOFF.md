@@ -19,14 +19,31 @@ The host has Python 3.14.8. Python 3.11 and remote GitHub Actions are not locall
 verified. No YouTube requests, model calls, ingestion or real UAT were performed.
 The P0 timebox is an estimate; satisfying evidence gates takes precedence.
 
-## P1 next
+## P1 authorization and scope
 
-After P0 is approved and committed, current_phase advances to P1. Stop there for
-this start prompt. Read the discovery acceptance criteria and build only the URL
-parser and source-discovery interface with deterministic metadata fixtures.
-Do not fetch transcripts until P2. Preserve inaccessible/unsupported states,
-stable IDs and ordering, limits and deduplication. Do not assume every YouTube
-source is accessible or add anti-bot workarounds.
+The initial start prompt stopped after P0. The user subsequently authorized P1.
+P1 implements URL parsing, streamed metadata discovery, structured manifests and
+the discover CLI with deterministic offline fixtures. See [Discovery](DISCOVERY.md)
+and the P1 test/review reports for semantics and evidence. No transcript ingestion,
+SQLite domain migration or real user acceptance is part of P1.
+
+P1 is complete: optional backend installation/native offline contract succeeded,
+all 64 tests passed, and the separate AI review approved the updated actual diff.
+The initial review found discarded temporal metadata and advised an overflow fix;
+both are resolved and retained in the review history with regression evidence.
+The final implementation preserves source dates/timestamps and every conflicting
+observation, and malformed optional numbers do not abort remaining collection
+entries. State advances to P2 with user testing disabled. Live YouTube access,
+Python 3.11, minimum backend version and remote CI remain unverified.
+
+## P2 next
+
+After P1 approval and gates, advance to P2 and stop until it is requested. P2 adds
+caption-track selection, normalization, per-video canonical records and resumable
+SQLite ingestion state. Preserve discovery source IDs, original input URLs and
+metadata observations. Transcript timestamps and provenance must survive every
+transformation. Export grouping remains a view and belongs to P3. Keep unavailable
+sources explicit; do not assume complete YouTube coverage or implement bypasses.
 
 Use the documented .venv install/test commands; re-install the package after code
 changes before testing installed behavior. Reports and a separate AI review are

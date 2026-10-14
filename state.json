@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "knowledge-foundry",
-  "current_phase": "P1",
+  "current_phase": "P2",
   "user_testing_allowed": false,
   "rules": {
     "agent_written_tests_required": true,
@@ -29,16 +29,16 @@
     },
     "P1": {
       "title": "Video source discovery",
-      "status": "pending",
+      "status": "completed",
       "tests": {
-        "status": "pending",
-        "report": null
+        "status": "passed",
+        "report": "docs/test-reports/P1.md"
       },
       "review": {
-        "status": "pending",
-        "report": null
+        "status": "approved",
+        "report": "docs/reviews/P1.md"
       },
-      "knowledge_updated": false,
+      "knowledge_updated": true,
       "planned_commit_message": "feat(ingest): discover videos from supported URLs",
       "blockers": []
     },

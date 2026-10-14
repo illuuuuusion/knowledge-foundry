@@ -6,6 +6,11 @@ The only foundation commands are `config` and `init`; help and imports have no
 storage effects. `ingest`, `export`, `builder` and `knowledge` are empty module
 boundaries for later phases, not implementations of those phases.
 
+P1 extends the existing CLI with `discover` and implements only `ingest` discovery;
+see [Discovery](DISCOVERY.md). The other boundaries remain empty. This required
+changing the P0 CLI entry point and optional packaging metadata; the full P0
+regression suite is rerun as part of P1. P0 state and recorded evidence are retained.
+
 ## Configuration
 
 Immutable Config values come from environment > explicit TOML > defaults.

@@ -1,1 +1,1 @@
-"""Reserved for source discovery and canonical transcript ingestion (P1–P2)."""
+"""Metadata discovery (P1); canonical transcript ingestion remains reserved for P2."""
