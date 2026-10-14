@@ -48,3 +48,35 @@ sources explicit; do not assume complete YouTube coverage or implement bypasses.
 Use the documented .venv install/test commands; re-install the package after code
 changes before testing installed behavior. Reports and a separate AI review are
 required before phase completion. Add ignores for custom paths kept in the repo.
+
+## P2 implementation and limits
+
+P2 is explicitly authorized by the user. Caption selection/normalization and
+resumable canonical storage are implemented; see [Transcripts](TRANSCRIPTS.md).
+The initial full run passed 101 tests. An additional malformed Unicode regression
+brought the suite to 102 passing tests. The initial separate review requested a
+caption verification-status fix and advised resolving database aliases for worker
+locking. Both are now fixed with regressions; 104 tests passed after rebuild.
+The same separate reviewer approved the updated actual diff, reran all 104 tests
+and confirmed status isolation, cross-process original/symlink worker exclusion
+and installed/source parity. No unresolved blocking issue remains. Reports and
+project knowledge are updated; P2 completes and state advances to P3 for handoff
+only, with user testing still disabled. Final validator/commit checks are recorded
+in the test report. No P3 implementation is authorized by this P2 request.
+
+The shared Python API accepts the P1 Manifest and configured SQLite/canonical
+paths. SQLite retains source manifests, jobs and one normalized transcript per
+video, with JSON projections repairable offline. Retries, permanent failure
+recovery, interrupted jobs and worker exclusion are covered by offline fixtures.
+No live source access, fallback API, media download, later-phase feature or real
+UAT was performed. P3 must expose the same service through CLI/UI and treat
+export grouping purely as a view. Language/preference changes do not replace
+already successful captions; consult the explicit storage/recovery contract.
+
+## P3 next
+
+Stop after P2 completion and commit. When requested, P3 adds scrape/export CLI,
+Streamlit and Markdown/TXT/JSONL grouping views over the canonical transcripts.
+Read TRANSCRIPTS.md first: reuse the service and preserve source evidence, all
+timing and explicit uncertainty. A persisted-manifest reload convenience API can
+be added if the P3 workflow needs it; P2 snapshots already retain the inputs.

@@ -2,7 +2,7 @@
 
 Local-first Python foundation for source-grounded video knowledge workflows.
 P0 provides configuration, logging and SQLite migrations. P1 adds metadata
-discovery. Transcript ingestion and knowledge exports arrive in later phases.
+discovery. P2 adds caption ingestion and canonical storage; exports arrive in P3.
 The offline test suite and base installation need no external service or model API.
 
 Requires Python 3.11 or newer. From the repository root:
@@ -83,3 +83,49 @@ See `AGENTS.md`, `state.json`, `IMPLEMENTATION_PLAN.md` and
 the package and runs the same offline tests and state validator on Python 3.11
 and 3.14. A validator checks recorded evidence and ordering; it does not run tests
 or prove review quality. Human acceptance is reserved for P8.
+
+## Transcript ingestion (P2 Python service)
+
+Use the same optional `discovery` extra for caption access. P2 exposes the shared
+Python service; the `scrape` CLI and UI are reserved for P3. For an authorized source:
+
+```python
+from kforge.config import load_config
+from kforge.ingest.discovery import discover
+from kforge.ingest.transcripts import TranscriptStore, ingest
+
+config = load_config()
+manifest = discover("YOUR_AUTHORIZED_YOUTUBE_URL", limit=10)
+store = TranscriptStore(config.database, config.data_dir / "canonical")
+results = ingest(manifest, store, languages=("de", "en"), preference="manual")
+print(results)
+print(store.jobs())
+```
+
+The language list is ordered; a base code such as `de` accepts regional variants.
+Within the selected language, `manual` or `auto` is preferred with the other kind
+as fallback. Explicit locales require that locale. JSON3, WebVTT and SRT are
+supported. No arbitrary language is selected when none matches. Source-provided
+automatic tracks may include translations; kind is not a confidence assessment.
+Only subtitle content is downloaded; there is no video/audio download or bypass.
+
+SQLite retains the discovery manifest, source inputs, per-video job status and
+one canonical transcript per video. A generated `<video_id>.json` in the configured
+canonical directory contains metadata observations, timestamped segments, original
+cue/word timing, track URL and retrieval provenance. Source claims remain unverified,
+confidence unknown and visual dependencies unassessed. Caption/source text is data.
+
+Rerunning the same manifest skips successful retrievals, merges new discovery
+provenance and repairs missing/corrupt JSON files from SQLite. Selection changes
+apply only to videos without a stored transcript. Transient network/rate-limit
+failures retry up to three times per invocation with bounded backoff; failed jobs
+retain lifetime attempt counts. Permanent failures require `retry_failed=True`
+after addressing the cause. Interrupted jobs resume on the next invocation.
+`projection_failed` reports file-write failure while the canonical SQLite record
+is retained; rerun to repair. SQLite failures propagate, leaving resumable state.
+One ingestion worker per database is enforced with a crash-released SQLite sidecar
+lock. Keep the database and its lock at stable paths on a local filesystem; use one
+canonical directory per database. All default runtime files are ignored.
+
+No live caption access has been verified; tests use original synthetic fixtures
+and mocked native yt-dlp calls. See [P2 storage contract](docs/project-knowledge/TRANSCRIPTS.md).

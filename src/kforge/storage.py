@@ -1,4 +1,4 @@
-"""Transactional, ordered SQLite migrations. Domain tables arrive in P2."""
+"""Transactional, ordered SQLite migrations."""
 
 from contextlib import closing
 from pathlib import Path
@@ -9,6 +9,14 @@ MIGRATIONS = (
     (1, (
         "CREATE TABLE schema_migrations (version INTEGER PRIMARY KEY, "
         "applied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)",
+    )),
+    (2, (
+        "CREATE TABLE ingestion_manifests (id TEXT PRIMARY KEY, payload TEXT NOT NULL)",
+        "CREATE TABLE transcripts (video_id TEXT PRIMARY KEY, payload TEXT NOT NULL)",
+        "CREATE TABLE ingestion_jobs (video_id TEXT PRIMARY KEY, "
+        "status TEXT NOT NULL CHECK(status IN ('pending','running','succeeded','failed','unsupported')), "
+        "attempts INTEGER NOT NULL DEFAULT 0, issue TEXT, "
+        "updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)",
     )),
 )
 

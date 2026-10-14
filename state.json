@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "knowledge-foundry",
-  "current_phase": "P2",
+  "current_phase": "P3",
   "user_testing_allowed": false,
   "rules": {
     "agent_written_tests_required": true,
@@ -44,16 +44,16 @@
     },
     "P2": {
       "title": "Transcript ingestion and storage",
-      "status": "pending",
+      "status": "completed",
       "tests": {
-        "status": "pending",
-        "report": null
+        "status": "passed",
+        "report": "docs/test-reports/P2.md"
       },
       "review": {
-        "status": "pending",
-        "report": null
+        "status": "approved",
+        "report": "docs/reviews/P2.md"
       },
-      "knowledge_updated": false,
+      "knowledge_updated": true,
       "planned_commit_message": "feat(ingest): normalize and persist transcripts",
       "blockers": []
     },

@@ -42,3 +42,12 @@ nonempty local report files and the P8 user-testing boundary. It does not execut
 tests or infer review approval from a file. Reports cannot point outside the repo,
 including through symlinks. Unit tests use independent synthetic state fixtures
 so advancing state.json does not change the expected workflow tests.
+
+## P2 extension
+
+P2 appends migration v2 (manifest, canonical transcript and job tables) without
+changing applied v1. Foundation migration/init tests now expect current v2 and
+rerun alongside P1 regressions. Captions and resumability use standard-library
+storage and parsing; the existing optional discovery extra supplies yt-dlp access.
+SQLite is authoritative; per-video JSON is an atomic, recoverable file projection.
+See [Transcripts](TRANSCRIPTS.md) for the service, provenance and recovery contract.

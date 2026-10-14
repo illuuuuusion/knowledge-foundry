@@ -48,3 +48,37 @@
 - The same separate reviewer rechecked the updated actual diff, reran all 64 tests
   and prior reproductions, and approved P1 with no unresolved findings. Advance to
   P2 for handoff only; do not implement transcript ingestion under this P1 request.
+
+## 2026-10-14 — P2 transcript ingestion
+
+- The user explicitly requested P2. Implement Python caption/storage services only;
+  scrape/export CLI and Streamlit remain P3. Changes to shared P0 migration tests
+  reflect append-only v2; all earlier regression tests must pass again.
+- Reuse optional yt-dlp rather than add a mandatory API or fallback dependency.
+  Select source-provided manual/auto tracks by language, then kind, exact locale and
+  deterministic format rank. No arbitrary-language fallback or media download.
+- Normalize JSON3, VTT and SRT offline, preserving original indices/cue/word timing
+  and raw event/cue evidence. Sort stable by start/index, retain overlapping/zero
+  duration cues and never clip offsets based on unverified metadata duration.
+- Persist one canonical video row in SQLite, then atomically project one JSON file.
+  This makes file-write interruptions recoverable without redownloading; the source
+  manifest is retained separately so original URLs and source failures survive.
+- A successful record is reused even if selection settings change; new discovery
+  observations/manifests are merged. Explicit successful-caption replacement and
+  multiple-language storage are deferred rather than duplicating canonical videos.
+- Use a separate SQLite exclusive lock to serialize local workers without holding
+  the state database's transaction across remote requests. Lock release on process
+  exit permits resume; distributed orchestration is outside this phase.
+- Keep retry budgets per invocation and lifetime attempt counts per video; classify
+  errors safely and allow an explicit retry_failed flag for permanent failures.
+- Reject invalid caption bounds, nonfinite values, bad UTF-8 and escaped unpaired
+  Unicode surrogates before SQLite writes. Never execute caption instructions or
+  label caption claims verified; request headers never enter stored provenance.
+- Independent review reproduced inherited verified status from a constructed
+  Video input. Force new captions unverified and test that original manifest
+  evidence remains intact. Also resolve store paths so database symlink aliases
+  share the same worker lock; regression checks exclusion through an alias.
+- The same separate reviewer approved follow-up after independently passing
+  all 104 tests, rechecking both fixes in offline reproductions/subprocesses and
+  confirming installed/source parity. All P2 acceptance gates are satisfied;
+  advance to P3 for handoff only and retain the P8-only UAT boundary.
