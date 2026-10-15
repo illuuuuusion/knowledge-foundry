@@ -164,3 +164,20 @@ tests and fresh path/collision reproductions (round 3). P6 is completed; state
 advances to P7, which the user has also authorized. User testing stays disabled.
 See KNOWLEDGE.md and the P6 test/review reports for the implementation contract,
 review history and residual limits. No live access or user acceptance occurred.
+
+## P7 implementation and verification
+
+P7 is authorized by the same request as P6 verification/completion. It adds five
+self-contained offline CLI integration scenarios and a temporary installed-wheel
+smoke script; no application feature changes were necessary. See VERIFICATION.md
+and docs/test-reports/P7.md for exact recovery behavior, coverage and limitations.
+All 177 tests pass. Eight fresh-wheel console commands and 22-file installed
+parity pass with reused dependencies. The isolated offline dependency attempt
+failed for absent dependency wheels, and is explicitly not counted as passed.
+The separate AI reviewer approved the actual diff, independently reran all 177
+tests and the wheel smoke, and found no blocking issue. Reports and project
+knowledge are finalized. P7 is complete; state advances to P8 and enables user
+testing. P8 remains pending: no real UAT or user sign-off has occurred. The
+current request ends with P7; do not mark P8 complete automatically. Next work
+requires the real authorized workflow and explicit sign-off described in
+`docs/uat/CHECKLIST.md`.

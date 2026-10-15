@@ -9,6 +9,7 @@ Read this index first; load only notes relevant to the active phase.
 - [Jobs](JOBS.md): P4 domain YAML, job files, result validation and import.
 - [Graph](GRAPH.md): P5 research bundles, statuses, entity merging and graph files.
 - [Knowledge](KNOWLEDGE.md): P6 library layout, escaping, file names, packs and budgets.
+- [Verification](VERIFICATION.md): P7 complete offline CLI scenarios, installation smoke and recovery.
 - [Transcripts](TRANSCRIPTS.md): P2 caption selection, canonical storage and recovery.
 - [Discovery](DISCOVERY.md): P1 source/manifest contract, pagination and limits.
 

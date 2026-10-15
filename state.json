@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
   "project": "knowledge-foundry",
-  "current_phase": "P7",
-  "user_testing_allowed": false,
+  "current_phase": "P8",
+  "user_testing_allowed": true,
   "rules": {
     "agent_written_tests_required": true,
     "independent_ai_review_preferred": true,
@@ -119,16 +119,16 @@
     },
     "P7": {
       "title": "AI end-to-end verification",
-      "status": "pending",
+      "status": "completed",
       "tests": {
-        "status": "pending",
-        "report": null
+        "status": "passed",
+        "report": "docs/test-reports/P7.md"
       },
       "review": {
-        "status": "pending",
-        "report": null
+        "status": "approved",
+        "report": "docs/reviews/P7.md"
       },
-      "knowledge_updated": false,
+      "knowledge_updated": true,
       "planned_commit_message": "test: complete automated end-to-end verification",
       "blockers": []
     },

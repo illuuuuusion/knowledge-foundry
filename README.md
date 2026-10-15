@@ -6,6 +6,7 @@ discovery. P2 adds caption ingestion and canonical storage; P3 adds grouped expo
 and a local Streamlit interface. P4 adds file-based agent extraction jobs; P5
 consolidates claims, agent research evidence and a graph; P6 builds portable,
 agent-ready knowledge libraries and packs.
+P7 verifies the complete offline CLI workflow, recovery and installed packaging.
 The offline test suite and base installation need no external service or model API.
 Runtime dependencies are Pydantic and PyYAML (P4 schema and domain configuration).
 
@@ -344,3 +345,65 @@ research texts and canonical records are never copied. Claim statements and
 evidence quotes still derive from third-party content, and many short quotes
 from one document can together reproduce much of it: review rights before
 sharing a library.
+
+## Reproducible verification and recovery (P7)
+
+After installing the current checkout, these commands run only synthetic fixtures:
+
+```sh
+.venv/bin/python -m unittest discover -s tests -v
+.venv/bin/python -m unittest discover -s tests -p test_end_to_end.py -v
+.venv/bin/python scripts/validate_state.py
+.venv/bin/python scripts/smoke_install.py --reuse-dependencies
+```
+
+The end-to-end tests use stub discovery/caption adapters, forbid socket connections
+in the fixture process and exercise the real CLI handlers through discovery,
+SQLite/canonical transcripts, grouped Markdown/TXT/JSONL export, file jobs,
+result import, research/graph and a separate portable knowledge workspace. They
+also run the installed module in subprocesses from an unrelated working directory
+with an explicit config. No YouTube, research page or model is contacted.
+Use the same `--config /absolute/path/config.toml` for every stage when changing
+working directories. A full suite with ui/discovery extras exercises the optional
+native UI/backend contracts; a base install skips the native Streamlit tests.
+
+`smoke_install.py` builds a wheel without network access, checks its contents,
+creates a fresh temporary environment, verifies installed/source parity and runs
+eight console commands against an empty local store. `--reuse-dependencies`
+reuses the invoking interpreter's site-packages for dependencies; the application
+wheel itself must import from the fresh environment. This mode does not prove a
+fully isolated dependency installation. To test that too, provide a directory
+containing wheels for Pydantic, PyYAML and their dependencies:
+
+```sh
+.venv/bin/python scripts/smoke_install.py --wheelhouse /absolute/path/to/wheels
+```
+
+Without either option, only the application wheel is available, so a clean offline
+install fails if dependency wheels are missing. Build tooling (`setuptools>=68`
+and pip wheel support) must already exist in the invoking environment. All smoke
+runtime files and environments are temporary and removed automatically.
+
+Recovery follows the stored status:
+
+- A partial `scrape` returns exit 1 and exports its successes. Rerun the same
+  command to resume interrupted/transient failures. For invalid/unavailable
+  captions, correct the cause and add `--retry-failed`; successful videos retain
+  their original transcripts and are not fetched again. Discovery still runs.
+- Missing/corrupt generated canonical JSON is repaired from SQLite on `scrape`.
+  Offline `export` reads SQLite directly. A corrupt SQLite canonical record needs
+  restoration from a known-good backup; deleting its generated JSON cannot fix it.
+- A rejected `result.json` returns exit 1 and preserves any previous accepted
+  result. Correct it and rerun `jobs import`; valid unchanged results are skipped.
+- A rejected research bundle returns exit 1, but consolidation/library rebuild
+  still runs without that bundle's evidence and can change derived statuses.
+  Correct the bundle/saved text and rebuild to restore the evidence. Keep agent
+  work in sources/jobs, since rebuilding replaces the generated library tree.
+
+The test/review evidence is in [P7 tests](docs/test-reports/P7.md) and
+[P7 review](docs/reviews/P7.md). Live YouTube/web retrieval, an actual model's
+extraction quality, Claude Projects upload, minimum dependency versions and remote
+CI remain unverified locally. Token caps are character-based estimates, entity
+merging relies on agent-supplied aliases, and concurrent library writers are not
+supported. Real user acceptance is the separate P8 gate in
+[the UAT checklist](docs/uat/CHECKLIST.md); automated P7 success is not user sign-off.
