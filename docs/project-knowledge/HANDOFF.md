@@ -181,3 +181,63 @@ testing. P8 remains pending: no real UAT or user sign-off has occurred. The
 current request ends with P7; do not mark P8 complete automatically. Next work
 requires the real authorized workflow and explicit sign-off described in
 `docs/uat/CHECKLIST.md`.
+
+## P8 live trial support and parser maintenance
+
+The user supplied video PIt_02rTgx0, reported shell parsing failures, then asked
+the AI to execute the live workflow and build a small graph. A correct invocation
+parsed, but German auto captions were rate-limited. The original English JSON3
+response exposed durationless append-newline events that P2 had rejected. The
+focused P8 repair and two synthetic regressions now retain those controls under
+source_timing.formatting_events without inventing durations or relaxing spoken
+text validation. See TRANSCRIPTS.md and the P8 test/review reports. Historical
+P2/P7 approval evidence is unchanged; this is a later documented repair.
+
+179 offline tests passed, independently rerun by the reviewer. The actual English
+CLI then succeeded (1945 text segments, ten preserved formatting controls). Two
+real AI-authored job results yielded nine selected unverified statements, 19 nodes
+and 33 edges. No visual verification/external corroboration is claimed. Four
+snapshot checks and independent source-range review passed. Outputs and a Mermaid
+view live under ignored output/live-PIt_02rTgx0; the generated library also has an
+identical temporary external copy at /private/tmp/kforge-knowledge-PIt_02rTgx0.
+
+P8 remains in_progress and unsigned. docs/uat/REPORT.md records only the user's
+reported CLI failures and the actual AI support run, not fabricated human UAT.
+The parser fix/evidence remain uncommitted because the phase's explicit user
+acceptance gate has not passed. Do not mark DONE or create the final P8 commit
+without actual user sign-off. The German rate-limit and other external/client
+verification limits remain explicit in the reports.
+
+## P8 playlist/channel expansion
+
+The user explicitly requested the same live workflow for a four-video playlist
+and the entire northwestrepair channel. See LIVE_COLLECTIONS.md for source
+semantics, runtime paths, precise outcomes and pending extraction coverage.
+Playlist: 4/4 transcripts, repeated without refetch/duplicates, ten selected
+claims and a 24-node/25-edge graph. Channel: all 448 discovered videos attempted
+without cap, 432 transcripts exported, twelve without captions and four remaining
+rate-limited. Resume preserved every prior successful payload hash/attempt count.
+
+P8 additionally fixes /playlists channel navigation normalization and explicit
+missing-tab classification. Three new synthetic tests bring the full suite to
+182 passing tests; the separate reviewer approved the fixes. Four real-artifact
+tests per corpus passed. Channel job generation covers all successful canonical
+videos (468 jobs); only eight results are imported and 460 remain pending.
+Selected graph: 21 unverified statements, six videos, 46 nodes/65 edges. No claim
+of exhaustive AI extraction or user acceptance is made. Both library workspaces
+have matching external temporary copies. P8 remains in progress and uncommitted
+under the explicit user-sign-off gate.
+
+
+## P8 user acceptance and final commit authorization
+
+After the complete reported playlist/channel trial and disclosed limitations,
+the user replied "Gut committe". This is recorded as explicit acceptance of the
+presented scope and authorization to commit. The UAT report quotes that actual
+message, while preserving the distinction between AI-run live checks and user
+sign-off; no additional hands-on user test or external client session is invented.
+P8 is completed and state advances to DONE. Existing independent repair/artifact
+reviews remain approved; final tests/state validation precede the planned English
+phase commit. Raw transcripts, runtime outputs, credentials and pending extraction
+results stay out of Git. Accepted residual limits remain documented, including
+16 inaccessible/rate-limited videos and 460 pending semantic extraction jobs.

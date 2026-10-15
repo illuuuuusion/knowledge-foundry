@@ -235,6 +235,25 @@ class EndToEndTests(unittest.TestCase):
         self.cli('jobs', 'import', self.domain_file)
         self.assertEqual(self.build()['claims'], 3)
 
+    def test_json3_formatting_controls_survive_export_jobs_and_pack(self):
+        payload = json.loads(PAYLOAD)
+        control = {'tStartMs': 2000, 'aAppend': 1, 'wWinId': 1, 'segs': [{'utf8': '\n'}]}
+        payload['events'].insert(1, control)
+        self.captions.payloads[IDS[0]] = json.dumps(payload).encode()
+        report = self.scrape()
+        snapshot = read_snapshot(self.config.database)
+        first = snapshot[0]['record']
+        self.assertEqual(first['segments'][0]['source_timing']['formatting_events'],
+                         [{'source_index': 1, 'event': control}])
+        self.assertEqual([s['source_index'] for s in first['segments']], [0, 2])
+        exported = [json.loads(line) for item in report['exports']['artifacts'] if item['format'] == 'jsonl'
+                    for line in Path(item['path']).read_text(encoding='utf-8').split('\n') if line]
+        self.assertEqual(exported, list(snapshot))
+        self.create_results()
+        self.cli('jobs', 'import', self.domain_file)
+        self.assertEqual(self.build()['claims'], 3)
+        self.assertTrue(all(c['citations'][0]['start'] == 1.25 for c in self.rows('claims.jsonl')))
+
     def test_corrupt_agent_and_research_inputs_keep_valid_state_and_recover(self):
         self.scrape()
         self.create_results()

@@ -90,6 +90,20 @@ class URLTests(unittest.TestCase):
             with self.subTest(url=url), self.assertRaises(UnsupportedURL):
                 parse_url(url)
 
+    def test_channel_playlist_navigation_normalizes_to_video_feed(self):
+        for path in ('@fixture', 'channel/UC' + 'A' * 22, 'c/fixture', 'user/fixture', '@f%C3%BCxture'):
+            root = 'https://www.youtube.com/' + path
+            navigation = root + '/playlists?view=1&si=fixture'
+            with self.subTest(path=path):
+                source = parse_url(navigation)
+                self.assertEqual(source.kind, 'channel')
+                self.assertEqual(source.input_url, navigation)
+                self.assertEqual(source.source_id, parse_url(root).source_id)
+                self.assertEqual(source.canonical_url, parse_url(root + '/videos').canonical_url)
+        for path in ('/playlists/PL_fixture', '/about/playlists', '/playlists/streams'):
+            with self.subTest(path=path), self.assertRaises(UnsupportedURL):
+                parse_url(CHANNEL + path)
+
     def test_url_list_preserves_order_duplicates_and_invalid_lines(self):
         self.assertEqual(parse_url_list(f"# Synthetic fixture\n\n {VIDEO} \n{VIDEO}\ninvalid\n"),
                          [VIDEO, VIDEO, "invalid"])
@@ -160,6 +174,16 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual([s.input_url for s in manifest.sources], [VIDEO, short])
         self.assertEqual(manifest.sources[1].source.input_url, short)
 
+    def test_channel_playlist_tab_and_root_share_discovery_and_keep_inputs(self):
+        adapter = FixtureAdapter({parse_url(CHANNEL).canonical_url: [entry(A), entry(B)]})
+        navigation = CHANNEL + '/playlists'
+        manifest = discover([navigation, CHANNEL], adapter=adapter)
+        self.assertEqual(adapter.calls, [parse_url(CHANNEL).canonical_url])
+        self.assertEqual([s.input_url for s in manifest.sources], [navigation, CHANNEL])
+        self.assertEqual(manifest.sources[0].source.input_url, navigation)
+        self.assertEqual([v.video_id for v in manifest.videos], [A, B])
+        self.assertEqual(len(manifest.videos[0].observations), 1)
+
     def test_lazy_pagination_for_channel_and_playlist(self):
         for url in (CHANNEL, PLAYLIST):
             pages = []
@@ -222,6 +246,18 @@ class DiscoveryTests(unittest.TestCase):
         self.assertEqual(manifest.sources[0].status, "partial")
         self.assertEqual(manifest.sources[0].issues[0].code, "network_error")
         self.assertTrue(manifest.sources[0].issues[0].retryable)
+
+    def test_missing_channel_tab_is_explicit_and_keeps_other_sources(self):
+        streams = CHANNEL + '/streams'
+        adapter = FixtureAdapter({PLAYLIST: [entry(A)], parse_url(streams).canonical_url:
+                                  [RuntimeError('ERROR: This channel does not have a streams tab')]})
+        manifest = discover([PLAYLIST, streams], adapter=adapter)
+        self.assertEqual([v.video_id for v in manifest.videos], [A])
+        self.assertEqual([s.status for s in manifest.sources], ['ok', 'tab_unavailable'])
+        issue, = manifest.sources[1].issues
+        self.assertEqual(issue.code, 'tab_unavailable')
+        self.assertFalse(issue.retryable)
+        self.assertEqual(issue.message, 'The requested channel tab is not available')
 
     def test_synchronous_adapter_errors_are_classified(self):
         class Broken:

@@ -99,6 +99,7 @@ def _json3(text: str) -> list[dict]:
     if not isinstance(doc, dict) or not isinstance(doc.get('events'), list):
         raise _invalid()
     segments = []
+    leading_controls = []
     for index, event in enumerate(doc['events']):
         if not isinstance(event, dict):
             raise _invalid()
@@ -109,15 +110,29 @@ def _json3(text: str) -> list[dict]:
                 not isinstance(piece.get('utf8'), str) for piece in pieces):
             raise _invalid()
         start = _number(event.get('tStartMs')) / 1000
-        duration = _number(event.get('dDurationMs')) / 1000
         for piece in pieces:
             if 'tOffsetMs' in piece:
                 _number(piece['tOffsetMs'])
+        content = ''.join(piece['utf8'] for piece in pieces)
+        # Live JSON3 can append a line break without a duration. It is formatting,
+        # not a timed utterance: retain its raw event/index with adjacent provenance
+        # rather than inventing an end time or rejecting the entire transcript.
+        if ('dDurationMs' not in event and event.get('aAppend') == 1
+                and content in ('\n', '\r\n')):
+            control = {'source_index': index, 'event': event}
+            if segments:
+                segments[-1]['source_timing'].setdefault('formatting_events', []).append(control)
+            else:
+                leading_controls.append(control)
+            continue
+        duration = _number(event.get('dDurationMs')) / 1000
         timing = {'unit': 'milliseconds', 'start': event['tStartMs'],
                   'duration': event['dDurationMs'],
                   'event': event}  # Preserve word offsets and other source fields.
-        segments.append(_segment(index, start, start + duration,
-                                 ''.join(piece['utf8'] for piece in pieces), timing))
+        if leading_controls:
+            timing['formatting_events'] = leading_controls
+            leading_controls = []
+        segments.append(_segment(index, start, start + duration, content, timing))
     return segments
 
 

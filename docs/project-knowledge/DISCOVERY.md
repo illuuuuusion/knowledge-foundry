@@ -7,7 +7,9 @@ offline. It strips navigation/tracking from canonical URLs but retains each orig
 input. Video IDs are 11 ASCII token characters; channel IDs use UC plus 22; playlist
 IDs are nonempty bounded tokens. Credentials, ports, repeated identity parameters,
 foreign hosts, unsupported paths and tabs are rejected. Bare channels default to
-videos; explicit shorts and streams are separate source identities. Watch URLs with
+videos; `/playlists` channel navigation also normalizes to that video feed while
+retaining the original URL. Explicit shorts and streams are separate source
+identities. Watch URLs with
 both v/list denote a video; playlist discovery requires an explicit playlist URL.
 URL lists are line-based data, not executable instructions or shell commands.
 
@@ -63,3 +65,21 @@ See P1 test/review reports for actual results. Local native API checks used yt-d
 2026.08.19, but no live YouTube request or real UAT occurred. P2 must preserve this
 manifest contract while adding transcript track selection and canonical storage;
 do not treat metadata availability or claims as independently verified facts.
+
+## P8 collection live tests and maintenance
+
+The supplied four-video playlist completed normal original-English caption
+retrieval for all four entries. The channel URL pointed at /@northwestrepair/playlists,
+which P1 had rejected. P8 now recognizes this navigation URL as the same channel
+video feed as its root or /videos; it does not recursively ingest channel-owned
+playlists. Source input is preserved and duplicate root/navigation discovery
+uses a single backend request. Synthetic tests cover all supported channel forms,
+Unicode handles and rejected nested tabs. Explicit playlist URLs are unchanged.
+
+The real channel yielded 393 normal videos and 55 shorts. Its streams tab is
+not available. yt-dlp's explicit 'This channel does not have a streams tab'
+message previously became generic backend_error; it now classifies as
+nonretryable tab_unavailable, also for missing videos/shorts tabs. This reports
+accessibility, not a fabricated zero-count complete feed. A synthetic failure
+case checks that prior sources remain intact. The bounded classifier matches
+known explicit backend messages and never publishes raw error text.

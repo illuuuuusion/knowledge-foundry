@@ -56,6 +56,10 @@ one URL per line; blank lines and full-line `#` comments are ignored. Positional
 URLs precede file entries. The parser supports watch/shorts/live/embed and youtu.be
 video URLs, playlist URLs and channel IDs, handles and legacy c/user URLs. Bare
 channels normalize to the videos tab; shorts/streams tabs are also supported.
+A channel's `/playlists` navigation URL also selects its normal video feed and
+retains the original input. Use an explicit `/playlist?list=...` URL to select a
+particular playlist. Shorts and streams are separate feeds; pass their URLs as
+additional sources to include them. A missing channel tab reports `tab_unavailable`.
 A watch URL containing both `v` and `list` means the individual video. Schemes,
 hosts and IDs are validated before the backend is called.
 

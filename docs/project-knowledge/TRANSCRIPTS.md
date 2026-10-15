@@ -108,3 +108,15 @@ P3 owns scrape/export CLI, Streamlit and grouping views over these canonical rec
 P2 completed after separate AI follow-up approval: 104 tests passed independently,
 including review-driven verification and database-alias regressions. No blocking
 review issue remains. Final root gate evidence is recorded in the test report.
+
+## P8 live-format repair
+
+The real video PIt_02rTgx0 exposed JSON3 append-newline events (`aAppend=1`,
+`segs` containing only newline) without dDurationMs. P2's original strict parser
+rejected the whole transcript. The P8 repair recognizes only these durationless
+newline controls, retaining raw events and original event indices under adjacent
+segment `source_timing.formatting_events`. Leading controls attach to the first
+text segment. No duration/end is fabricated; non-formatting text with missing
+or invalid timing still fails. Synthetic parser and end-to-end regressions cover
+this shape; real captions stay in ignored runtime storage. P2 history remains
+unchanged; P8 test/review reports track this later maintenance change.

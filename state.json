@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "knowledge-foundry",
-  "current_phase": "P8",
+  "current_phase": "DONE",
   "user_testing_allowed": true,
   "rules": {
     "agent_written_tests_required": true,
@@ -134,16 +134,16 @@
     },
     "P8": {
       "title": "Final user acceptance testing",
-      "status": "pending",
+      "status": "completed",
       "tests": {
-        "status": "pending",
-        "report": null
+        "status": "passed",
+        "report": "docs/test-reports/P8.md"
       },
       "review": {
-        "status": "pending",
-        "report": null
+        "status": "approved",
+        "report": "docs/reviews/P8.md"
       },
-      "knowledge_updated": false,
+      "knowledge_updated": true,
       "planned_commit_message": "docs: record final user acceptance results",
       "blockers": []
     }

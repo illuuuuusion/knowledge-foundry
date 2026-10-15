@@ -98,6 +98,37 @@ class SelectionTests(unittest.TestCase):
 
 
 class ParserTests(unittest.TestCase):
+    def test_json3_durationless_append_line_breaks_preserve_provenance(self):
+        def line(start):
+            return {'tStartMs': start, 'aAppend': 1, 'wWinId': 1, 'segs': [{'utf8': '\n'}]}
+
+        events = [line(0),
+                  {'tStartMs': 1250, 'dDurationMs': 750, 'segs': [{'utf8': 'Synthetic Grüße 🔧'}]},
+                  line(2000), line(2100),
+                  {'tStartMs': 3000, 'dDurationMs': 500, 'segs': [{'utf8': 'Synthetic next line'}]},
+                  line(3500)]
+        segments = normalize(json.dumps({'events': events}).encode(), 'json3')
+        self.assertEqual([(s['source_index'], s['start'], s['end'], s['text']) for s in segments],
+                         [(1, 1.25, 2.0, 'Synthetic Grüße 🔧'), (4, 3.0, 3.5, 'Synthetic next line')])
+        self.assertEqual(segments[0]['source_timing']['event'], events[1])
+        self.assertEqual(segments[0]['source_timing']['formatting_events'],
+                         [{'source_index': i, 'event': events[i]} for i in (0, 2, 3)])
+        self.assertEqual(segments[1]['source_timing']['formatting_events'],
+                         [{'source_index': 5, 'event': events[5]}])
+        # Only missing-duration append line breaks are exempt. Spoken text still
+        # needs source duration, and malformed timestamps/offsets remain errors.
+        invalid = [dict(line(0), segs=[{'utf8': 'Synthetic spoken words'}]),
+                   dict(line(0), aAppend=0), dict(line(0), dDurationMs=None),
+                   dict(line(0), tStartMs=-1),
+                   dict(line(0), segs=[{'utf8': '\n', 'tOffsetMs': -1}])]
+        for event in invalid:
+            with self.subTest(event=event), self.assertRaises(CaptionError) as caught:
+                normalize(json.dumps({'events': [event]}).encode(), 'json3')
+            self.assertEqual(caught.exception.issue.code, 'invalid_captions')
+        with self.assertRaises(CaptionError) as caught:
+            normalize(json.dumps({'events': [line(0)]}).encode(), 'json3')
+        self.assertEqual(caught.exception.issue.code, 'captions_unavailable')
+
     def test_json3_unicode_provenance_and_inert_instructions(self):
         segments = normalize(PAYLOAD, 'json3')
         self.assertEqual((segments[0]['start'], segments[0]['end']), (1.25, 3.25))

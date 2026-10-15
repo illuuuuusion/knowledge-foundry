@@ -26,6 +26,7 @@ MESSAGES = {
     "backend_unavailable": "Install the discovery extra to use yt-dlp",
     "invalid_metadata": "Metadata entry does not identify a valid YouTube video",
     "backend_error": "Metadata extraction failed; no access workaround was attempted",
+    "tab_unavailable": "The requested channel tab is not available",
 }
 
 
@@ -65,6 +66,9 @@ def classify_error(error: Exception) -> Issue:
     codes.extend(int(code) for code in re.findall(r"http (?:error )?(\d{3})\b", message))
     if 429 in codes or "http error 429" in message or "too many requests" in message:
         code = "rate_limited"
+    elif any(f'this channel does not have a {tab} tab' in message
+             for tab in ('videos', 'shorts', 'streams')):
+        code = 'tab_unavailable'
     elif any(item in codes for item in (401, 403, 404, 410)) or any(
         token in message for token in ("private video", "video unavailable", "video is unavailable",
                                       "not available", "does not exist", "sign in", "login required",

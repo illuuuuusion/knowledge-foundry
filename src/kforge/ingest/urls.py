@@ -82,9 +82,12 @@ def parse_url(value: str) -> Source:
         channel, remainder = "/".join(parts[:2]), parts[2:]
     else:
         raise UnsupportedURL("Unsupported YouTube path")
-    if remainder not in ([], ["videos"], ["shorts"], ["streams"]):
+    if remainder not in ([], ["videos"], ["shorts"], ["streams"], ["playlists"]):
         raise UnsupportedURL("Unsupported channel tab")
-    tab = remainder[0] if remainder else "videos"
+    # A channel's playlist-navigation page identifies the channel, not one
+    # particular playlist. Use its regular video feed, as for the channel root;
+    # preserve the original input so this normalization stays traceable.
+    tab = remainder[0] if remainder and remainder != ["playlists"] else "videos"
     return Source(original, f"youtube:channel:{channel}:{tab}", "channel",
                   f"https://www.youtube.com/{quote(channel, safe='/@')}/{tab}")
 
