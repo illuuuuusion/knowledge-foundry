@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "knowledge-foundry",
-  "current_phase": "P5",
+  "current_phase": "P6",
   "user_testing_allowed": false,
   "rules": {
     "agent_written_tests_required": true,
@@ -89,16 +89,16 @@
     },
     "P5": {
       "title": "Research enrichment and graph",
-      "status": "pending",
+      "status": "completed",
       "tests": {
-        "status": "pending",
-        "report": null
+        "status": "passed",
+        "report": "docs/test-reports/P5.md"
       },
       "review": {
-        "status": "pending",
-        "report": null
+        "status": "approved",
+        "report": "docs/reviews/P5.md"
       },
-      "knowledge_updated": false,
+      "knowledge_updated": true,
       "planned_commit_message": "feat(builder): consolidate evidence and graph relations",
       "blockers": []
     },

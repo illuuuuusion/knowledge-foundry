@@ -18,7 +18,7 @@ from .ingest.urls import parse_url_list
 from .storage import migrate
 from . import workflows
 from .export.transcripts import group_size
-from .builder import jobs
+from .builder import graph, jobs
 
 
 def _group_size(value: str) -> int | str:
@@ -69,6 +69,8 @@ def main(argv: list[str] | None = None) -> int:
         sub.add_argument('domain', type=Path, help='Domain YAML configuration')
     create.add_argument('--video-id', dest='video_ids', action='append',
                         help='Stable youtube:video:<id>; repeat to select videos (default: all stored)')
+    consolidate = commands.add_parser('consolidate', help='Merge imported claims and research bundles into graph files')
+    consolidate.add_argument('domain', type=Path, help='Domain YAML configuration')
     ui = commands.add_parser('ui', help='Run the local Streamlit interface (requires ui extra)')
     ui.add_argument('--port', type=int, default=8501)
     args = parser.parse_args(argv)
@@ -97,6 +99,11 @@ def main(argv: list[str] | None = None) -> int:
                 statuses = jobs.import_results(config.database, config.output_dir, domain)
             print(json.dumps([asdict(status) for status in statuses], ensure_ascii=False, indent=2))
             return int(any(status.status == 'rejected' for status in statuses))
+        elif args.command == 'consolidate':
+            report = graph.consolidate(config.database, config.source_dir, config.output_dir,
+                                       jobs.load_domain(args.domain))
+            print(json.dumps(report, ensure_ascii=False, indent=2))
+            return int(any(bundle['status'] == 'rejected' for bundle in report['bundles']))
         elif args.command == 'ui':
             if not 1 <= args.port <= 65535:
                 raise ValueError('port must be between 1 and 65535')

@@ -3,7 +3,8 @@
 Local-first Python foundation for source-grounded video knowledge workflows.
 P0 provides configuration, logging and SQLite migrations. P1 adds metadata
 discovery. P2 adds caption ingestion and canonical storage; P3 adds grouped exports
-and a local Streamlit interface. P4 adds file-based agent extraction jobs.
+and a local Streamlit interface. P4 adds file-based agent extraction jobs; P5
+consolidates claims, agent research evidence and a graph.
 The offline test suite and base installation need no external service or model API.
 Runtime dependencies are Pydantic and PyYAML (P4 schema and domain configuration).
 
@@ -238,3 +239,48 @@ job folder for the domain it fails with exit 1. Deleting an imported result.json
 shows `pending`, but the stored result remains in SQLite.
 Transcript text stays data: TASK.md contains only trusted configuration, IDs
 and numbers, and imported claims remain unverified for P5 evidence work.
+
+## Evidence consolidation and graph (P5)
+
+```sh
+kforge consolidate domain.example.yaml
+# Let an agent with permitted web access follow output/graph/<domain>/RESEARCH.md
+# and write research bundles to sources/research/<domain>/*.json, then rerun:
+kforge consolidate domain.example.yaml
+```
+
+`consolidate` is offline and deterministic. It reads the imported extraction
+results of the *current* jobs (results of older job IDs are ignored) and every
+research bundle in `<source_dir>/research/<domain>/`, then rewrites
+`<output_dir>/graph/<domain>/` with `claims.jsonl`, `evidence.jsonl`,
+`nodes.jsonl`, `edges.jsonl`, `RESEARCH.md` and `research.schema.json`.
+
+A research bundle lists documents (http(s) URL without credentials, optional
+title, `retrieved_at` with timezone, `retrieval_method`, and `text_file`: the
+saved retrieved text, relative to the research folder), evidence items (claim
+ID, document, `supports` or `contradicts`, exact quote) and claim-pair
+conflicts. A bundle is accepted or rejected as a whole: unknown or stale claim
+IDs, unknown or unused documents, quotes under 10 characters or not found in the
+saved text (whitespace-normalized), unsafe paths (including another bundle file
+as text), extra fields and invalid metadata reject it (exit 1).
+This checks the snapshot the agent saved, not the live page; no browsing
+infrastructure is included and URLs are agent-supplied retrieval metadata.
+
+Each claim keeps its video citations (source ID, URL, start/end seconds), entity
+node IDs, evidence IDs and conflicting claim IDs, and gets a derived
+`verification_status`: `unverified` (no external evidence), `corroborated`,
+`contradicted` or `contested` (mixed evidence or a recorded conflict). Nothing is
+labeled verified; conflicting claims are both kept. Entities of the same type
+merge when their names match after Unicode NFKC and whitespace normalization;
+matching is case-sensitive, so `10 mΩ` never merges with `10 MΩ`. Each entity
+links its name and aliases; different names merge only when every pair of names
+and aliases in their linked group is linked. A short name such as `3080` aliased
+as `RTX 3080` in one result and as `RTX 3080 Ti` in another therefore never merges
+those two models; the two `3080` entities share a node because their names are
+equal, even though their aliases disagree. One such bridge also keeps an otherwise
+equivalent pair apart (it errs toward splitting). Entity node IDs can change when
+new results add merges. Identical documents (same URL and content) and identical evidence merge
+while keeping every retrieval (with its title) and bundle. Nodes are videos, entities, claims and documents; edges are `mentions`,
+`cited_in` (with timestamps), `supports`/`contradicts` and `conflicts_with`.
+The build fails rather than write a graph with dangling edges. Saved document
+texts and transcripts stay local; outputs contain quotes, not full documents.

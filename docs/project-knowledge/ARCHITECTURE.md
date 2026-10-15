@@ -67,3 +67,11 @@ become the first core runtime dependencies (local open-source libraries; no
 service, MCP or proprietary API). Append-only migration v3 adds
 `extraction_results`; v1/v2 are unchanged, and existing migration tests now expect
 v3. Export and jobs read through the P3 `read_snapshot`. See [Jobs](JOBS.md).
+
+## P5 extension
+
+P5 adds `builder/graph.py` and the `consolidate` CLI. No migration: it reads the
+P4 `extraction_results` table read-only plus research bundle files from the
+configured source directory and rebuilds `output_dir/graph/<domain>/`. It reuses
+P4's strict Pydantic base model, error formatting and atomic writer. See
+[Graph](GRAPH.md).

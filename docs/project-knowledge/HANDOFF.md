@@ -128,3 +128,26 @@ to canonical segments for provenance. Claims arrive `unverified` with agent
 confidence and visual dependency; P5 adds external evidence and must never promote
 an observation to verified without it. Bump `RESULT_SCHEMA_VERSION` if result
 schema, TASK.md rules or validation change.
+
+## P5 implementation and limits
+
+P5 is explicitly authorized. `kforge consolidate` builds claims/evidence/nodes/
+edges plus RESEARCH.md and research.schema.json; see [Graph](GRAPH.md). 164 tests
+passed (155 prior + 9 P5). The separate reviewer requested changes twice (entity
+false merges B1–B3) and approved round 3 after fixes and its own reproductions.
+Its code-blind research smoke (synthetic page, no web access) produced an accepted
+bundle on the first attempt. No live web research, model API, Python 3.11,
+minimum dependency versions, remote CI or UAT were exercised.
+
+## P6 next
+
+Stop after P5 completion and commit until P6 is requested. P6 builds portable
+packs from `output/graph/<domain>/` (claims.jsonl, evidence.jsonl, nodes.jsonl,
+edges.jsonl) or by calling `graph.consolidate`. Keep each claim's citations (video
+URL + start/end) and derived `verification_status`; never present `unverified` or
+`contested` claims as facts. Entity node IDs can change between builds (merges),
+so do not use them as stable public file names without a mapping. Packs must not
+include raw transcripts or saved research texts by default; evidence quotes are
+short excerpts. Known entity-merge limits: equal names merge despite conflicting
+aliases; one entity aliasing two models merges them (N9). If TASK.md rules are
+changed (e.g. an alias definition), bump `RESULT_SCHEMA_VERSION` deliberately.

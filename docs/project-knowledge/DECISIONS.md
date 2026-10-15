@@ -133,3 +133,26 @@
   docstring plus version-bump note, `run kforge init` hint for old stores.
   Documented: gap-edge citations, stale rows after re-ingest/settings change,
   pending after deleting an imported result, stale folders exit 0.
+
+## 2026-10-15 — P5 evidence consolidation and graph
+
+- The user explicitly requested P5 fully. Implement research bundle intake, entity
+  merging, conflict retention, derived statuses and graph files; no P6 packs.
+- No migration: `consolidate` is a deterministic rebuild from P4 results of current
+  jobs plus bundle files in `<source_dir>/research/<domain>/`. Bundles are durable
+  user/agent inputs, so a pure function is simpler than another import state.
+- Research documents need a saved text snapshot; quotes must occur in it. This
+  checks the agent's snapshot, not the live page; no browsing infrastructure.
+- Statuses are derived only (unverified/corroborated/contradicted/contested); no
+  `verified` value exists. Conflicts are agent-declared and keep both claims.
+- Entity merging went through three review rounds: the first alias rule let short
+  names bridge models/revisions (B1) and casefolding merged unit prefixes (B2); a
+  names-only completeness rule still merged via reused short names (B3). Final
+  rule: case-sensitive NFKC/whitespace names; each entity links its strings
+  pairwise; names merge only within complete groups. It errs toward splitting.
+  Remaining by design: equal names merge although aliases disagree; one entity
+  aliasing two models merges them (N9); quadratic alias cost (N10).
+- Claims are not deduplicated across jobs; documents/evidence dedupe while
+  keeping every retrieval, title and bundle.
+- The same separate reviewer subagent (also P4 reviewer, no authored code) ran a
+  code-blind research-agent smoke with a synthetic page and approved round 3.
