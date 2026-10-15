@@ -1,1 +1,1 @@
-"""Reserved for portable knowledge packages (P6)."""
+"""Portable, agent-ready knowledge libraries and packs (P6)."""

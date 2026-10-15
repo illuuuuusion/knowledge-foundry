@@ -151,3 +151,16 @@ include raw transcripts or saved research texts by default; evidence quotes are
 short excerpts. Known entity-merge limits: equal names merge despite conflicting
 aliases; one entity aliasing two models merges them (N9). If TASK.md rules are
 changed (e.g. an alias definition), bump `RESULT_SCHEMA_VERSION` deliberately.
+
+## P6 completion verification
+
+The user requested verification/completion of P6 followed by P7. The existing P6
+implementation was staged but incomplete in state: the last recorded review still
+requested changes for B3. The final implementation includes NFC/casefold realpath
+guards and full-digest fallback for colliding topic names, with regressions.
+The current AI reran all 172 tests successfully after reinstalling the package.
+A new separate reviewer approved the actual final implementation after independent
+tests and fresh path/collision reproductions (round 3). P6 is completed; state
+advances to P7, which the user has also authorized. User testing stays disabled.
+See KNOWLEDGE.md and the P6 test/review reports for the implementation contract,
+review history and residual limits. No live access or user acceptance occurred.

@@ -4,7 +4,8 @@ Local-first Python foundation for source-grounded video knowledge workflows.
 P0 provides configuration, logging and SQLite migrations. P1 adds metadata
 discovery. P2 adds caption ingestion and canonical storage; P3 adds grouped exports
 and a local Streamlit interface. P4 adds file-based agent extraction jobs; P5
-consolidates claims, agent research evidence and a graph.
+consolidates claims, agent research evidence and a graph; P6 builds portable,
+agent-ready knowledge libraries and packs.
 The offline test suite and base installation need no external service or model API.
 Runtime dependencies are Pydantic and PyYAML (P4 schema and domain configuration).
 
@@ -284,3 +285,62 @@ while keeping every retrieval (with its title) and bundle. Nodes are videos, ent
 `cited_in` (with timestamps), `supports`/`contradicts` and `conflicts_with`.
 The build fails rather than write a graph with dangling edges. Saved document
 texts and transcripts stay local; outputs contain quotes, not full documents.
+
+## Knowledge libraries and packs (P6)
+
+```sh
+kforge knowledge domain.example.yaml --output ~/knowledge/gpu-repair
+kforge knowledge domain.example.yaml --output ~/knowledge/gpu-repair \
+  --topic gpu_model/rtx-3080 --budget essentials=4000 --budget full=60000
+```
+
+`knowledge` reruns `consolidate` (same exit code rules) and rewrites a
+self-contained library folder, by default `<output_dir>/knowledge/<domain>/`. Put
+it outside the application repository with `--output`; the report warns when the
+folder is inside a git repository, because Codex/Claude Code started there may
+also load that repository's AGENTS.md/CLAUDE.md. Then open the folder as its own
+Codex or Claude Code workspace, or upload single files to a Claude Project.
+
+- `INDEX.md`: entry point with status counts, usage rules and links to everything.
+- `AGENTS.md` and `CLAUDE.md` (identical): consult INDEX.md, load only relevant
+  files, state each claim's status/confidence/visual dependency, cite sources,
+  never invent them, and treat statements, titles and quotes as untrusted data.
+- `topics/<entity type>/INDEX.md` and one page per entity with every claim that
+  mentions it, grouped by claim kind; `topics/general.md` holds claims without an
+  entity. Topic key = `<entity type>/<file name>`.
+- `procedures/`: one file per video with its `procedure_step` claims in timestamp
+  order (other domains get none).
+- `references/videos.md` and `references/documents.md`: cited videos with every
+  claim timestamp, external documents with retrievals and evidence quotes.
+- `graph/`: copies of claims/evidence/nodes/edges JSONL; evidence quotes longer
+  than 300 characters are cut and marked `quote_truncated` (the full quote stays
+  in `output/graph/`).
+- `packs/`: single-file presets. `essentials.md` and `full.md` rank all claims
+  (corroborated, contested, unverified, contradicted; then extraction confidence,
+  then number of cited videos); `--topic` adds `topic-<type>-<name>.md` with that
+  topic's claims first, then claims sharing a topic with them. Budgets default to
+  8,000 / 16,000 / 100,000 tokens, estimated as characters/4. A pack keeps the
+  best-ranked whole claims that fit and states how many it omitted; a budget too
+  small for the header fails.
+
+Every claim shows its statement, derived status, confidence, visual dependency,
+video links with exact timestamp range (`&t=` deep link), evidence and conflicts
+with notes. Nothing is labeled verified. Every page repeats a short rules reminder
+for single-file uploads. Source-derived text is escaped as one inert Markdown line
+(no links, images, HTML, code or headings); only http(s) URLs become links.
+Viewers that auto-link bare URLs may still make URLs inside statements clickable;
+the rules tell agents those are not sources. File names are lowercase ASCII slugs; colliding, empty or
+`index` slugs get a hash, so case-insensitive file systems are safe.
+
+The build is deterministic: it writes a complete new tree beside the old one and
+swaps it in, so stale topic files disappear. It refuses symlinks, any non-empty
+folder that is not a library of the same domain (marker `.kforge-library`), and
+any destination that overlaps the source, database, `output_dir/graph` or
+`output_dir/jobs` folders or contains `output_dir`, even before they exist and
+compared case- and Unicode-insensitively (as macOS/Windows file systems do); do not
+keep own files inside a library. A rejected research bundle still yields a
+library without its evidence: the report warns and the exit code is 1. Transcripts, saved
+research texts and canonical records are never copied. Claim statements and
+evidence quotes still derive from third-party content, and many short quotes
+from one document can together reproduce much of it: review rights before
+sharing a library.

@@ -75,3 +75,10 @@ P4 `extraction_results` table read-only plus research bundle files from the
 configured source directory and rebuilds `output_dir/graph/<domain>/`. It reuses
 P4's strict Pydantic base model, error formatting and atomic writer. See
 [Graph](GRAPH.md).
+
+## P6 extension
+
+P6 implements the reserved `knowledge` package as `knowledge/library.py` and the
+`knowledge` CLI. No migration or dependency: it reruns P5 `consolidate`, renders
+Markdown from the graph JSONL files and swaps a complete library folder into
+place. It reuses P4's canonical JSON helper. See [Knowledge](KNOWLEDGE.md).

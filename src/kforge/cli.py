@@ -6,6 +6,7 @@ import json
 import importlib.util
 import os
 from pathlib import Path
+import re
 import sqlite3
 import subprocess
 import sys
@@ -19,6 +20,7 @@ from .storage import migrate
 from . import workflows
 from .export.transcripts import group_size
 from .builder import graph, jobs
+from .knowledge import library
 
 
 def _group_size(value: str) -> int | str:
@@ -26,6 +28,13 @@ def _group_size(value: str) -> int | str:
         return group_size(value)
     except ValueError as exc:
         raise argparse.ArgumentTypeError(str(exc)) from exc
+
+
+def _budget(value: str) -> tuple[str, int]:
+    preset, _, tokens = value.partition('=')
+    if preset not in library.BUDGETS or not re.fullmatch(r'[0-9]+', tokens) or int(tokens) < 1:
+        raise argparse.ArgumentTypeError('expected essentials|topic|full=<positive tokens>')
+    return preset, int(tokens)
 
 
 def _export_options(parser):
@@ -71,6 +80,14 @@ def main(argv: list[str] | None = None) -> int:
                         help='Stable youtube:video:<id>; repeat to select videos (default: all stored)')
     consolidate = commands.add_parser('consolidate', help='Merge imported claims and research bundles into graph files')
     consolidate.add_argument('domain', type=Path, help='Domain YAML configuration')
+    knowledge = commands.add_parser('knowledge', help='Build a portable knowledge library with INDEX.md and packs')
+    knowledge.add_argument('domain', type=Path, help='Domain YAML configuration')
+    knowledge.add_argument('--output', type=Path, help='Library folder (default: <output_dir>/knowledge/<domain>); '
+                           'keep it outside the application repository')
+    knowledge.add_argument('--topic', dest='topics', action='append', metavar='TYPE/NAME',
+                           help='Also write a topic pack; repeat. Keys are listed under topics/')
+    knowledge.add_argument('--budget', dest='budgets', action='append', type=_budget, metavar='PRESET=TOKENS',
+                           help='Approximate token budget (characters/4) for essentials, topic or full; repeat')
     ui = commands.add_parser('ui', help='Run the local Streamlit interface (requires ui extra)')
     ui.add_argument('--port', type=int, default=8501)
     args = parser.parse_args(argv)
@@ -104,6 +121,12 @@ def main(argv: list[str] | None = None) -> int:
                                        jobs.load_domain(args.domain))
             print(json.dumps(report, ensure_ascii=False, indent=2))
             return int(any(bundle['status'] == 'rejected' for bundle in report['bundles']))
+        elif args.command == 'knowledge':
+            report = library.build(config.database, config.source_dir, config.output_dir,
+                                   jobs.load_domain(args.domain), args.output, args.topics or (),
+                                   dict(args.budgets or ()))
+            print(json.dumps(report, ensure_ascii=False, indent=2))
+            return int(any(bundle['status'] == 'rejected' for bundle in report['graph']['bundles']))
         elif args.command == 'ui':
             if not 1 <= args.port <= 65535:
                 raise ValueError('port must be between 1 and 65535')

@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "project": "knowledge-foundry",
-  "current_phase": "P6",
+  "current_phase": "P7",
   "user_testing_allowed": false,
   "rules": {
     "agent_written_tests_required": true,
@@ -104,16 +104,16 @@
     },
     "P6": {
       "title": "Portable knowledge package generation",
-      "status": "pending",
+      "status": "completed",
       "tests": {
-        "status": "pending",
-        "report": null
+        "status": "passed",
+        "report": "docs/test-reports/P6.md"
       },
       "review": {
-        "status": "pending",
-        "report": null
+        "status": "approved",
+        "report": "docs/reviews/P6.md"
       },
-      "knowledge_updated": false,
+      "knowledge_updated": true,
       "planned_commit_message": "feat(knowledge): generate agent-ready knowledge packs",
       "blockers": []
     },
